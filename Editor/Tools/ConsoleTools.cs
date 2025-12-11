@@ -44,7 +44,7 @@ namespace Community.Unity.MCP
             }
         }
 
-        [McpTool("unity_get_console_logs", "Get recent Unity console logs")]
+        [McpTool("unity_get_console_logs", "Get recent Unity console logs", typeof(GetLogsArgs))]
         public static object GetConsoleLogs(string argsJson)
         {
             var args = JsonUtility.FromJson<GetLogsArgs>(argsJson);
@@ -104,8 +104,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class GetLogsArgs
         {
-            public int count;
-            public string type; // "Log", "Warning", "Error"
+            [McpParam("Number of logs to return (default 50)")] public int count;
+            [McpParam("Filter by type", EnumValues = new[] { "Log", "Warning", "Error" })] public string type;
         }
 
         [Serializable]

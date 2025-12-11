@@ -10,7 +10,7 @@ namespace Community.Unity.MCP
     [McpToolProvider]
     public class EditorTools
     {
-        [McpTool("unity_execute_menu", "Execute a Unity menu item")]
+        [McpTool("unity_execute_menu", "Execute a Unity menu item", typeof(ExecuteMenuArgs))]
         public static object ExecuteMenu(string argsJson)
         {
             var args = JsonUtility.FromJson<ExecuteMenuArgs>(argsJson);
@@ -29,7 +29,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_select_object", "Select a GameObject in the Editor")]
+        [McpTool("unity_select_object", "Select a GameObject in the Editor", typeof(SelectObjectArgs))]
         public static object SelectObject(string argsJson)
         {
             var args = JsonUtility.FromJson<SelectObjectArgs>(argsJson);
@@ -87,6 +87,72 @@ namespace Community.Unity.MCP
             };
         }
 
+        [McpTool("unity_enter_play_mode", "Enter play mode")]
+        public static object EnterPlayMode(string argsJson)
+        {
+            if (EditorApplication.isPlaying)
+            {
+                return new { error = "Already in play mode", isPlaying = true };
+            }
+            
+            if (EditorApplication.isCompiling)
+            {
+                return new { error = "Cannot enter play mode while compiling" };
+            }
+            
+            EditorApplication.isPlaying = true;
+            
+            return new PlayModeResult
+            {
+                success = true,
+                action = "enter",
+                isPlaying = true,
+                isPaused = false
+            };
+        }
+
+        [McpTool("unity_exit_play_mode", "Exit play mode")]
+        public static object ExitPlayMode(string argsJson)
+        {
+            if (!EditorApplication.isPlaying)
+            {
+                return new { error = "Not in play mode", isPlaying = false };
+            }
+            
+            EditorApplication.isPlaying = false;
+            
+            return new PlayModeResult
+            {
+                success = true,
+                action = "exit",
+                isPlaying = false,
+                isPaused = false
+            };
+        }
+
+        [McpTool("unity_pause_play_mode", "Pause or unpause play mode", typeof(PausePlayModeArgs))]
+        public static object PausePlayMode(string argsJson)
+        {
+            var args = JsonUtility.FromJson<PausePlayModeArgs>(argsJson);
+            
+            if (!EditorApplication.isPlaying)
+            {
+                return new { error = "Not in play mode", isPlaying = false };
+            }
+            
+            // Toggle or set specific state
+            bool newState = args?.pause ?? !EditorApplication.isPaused;
+            EditorApplication.isPaused = newState;
+            
+            return new PlayModeResult
+            {
+                success = true,
+                action = newState ? "pause" : "unpause",
+                isPlaying = true,
+                isPaused = newState
+            };
+        }
+
         private static string GetGameObjectPath(GameObject go)
         {
             string path = go.name;
@@ -104,7 +170,7 @@ namespace Community.Unity.MCP
         [Serializable]
         public class ExecuteMenuArgs
         {
-            public string menuPath;
+            [McpParam("Menu path (e.g., 'Edit/Play')", Required = true)] public string menuPath;
         }
 
         [Serializable]
@@ -117,7 +183,7 @@ namespace Community.Unity.MCP
         [Serializable]
         public class SelectObjectArgs
         {
-            public string path;
+            [McpParam("Path to the GameObject", Required = true)] public string path;
         }
 
         [Serializable]
@@ -143,6 +209,21 @@ namespace Community.Unity.MCP
             public string currentScene;
             public string currentScenePath;
             public string platform;
+        }
+
+        [Serializable]
+        public class PlayModeResult
+        {
+            public bool success;
+            public string action;
+            public bool isPlaying;
+            public bool isPaused;
+        }
+
+        [Serializable]
+        public class PausePlayModeArgs
+        {
+            [McpParam("Set to true to pause, false to unpause. If omitted, toggles current state.")] public bool pause;
         }
 
         #endregion

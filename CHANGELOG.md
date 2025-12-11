@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2024-12-12
+
+### Added
+- **Dynamic Schema Generation**: Tools now include full JSON Schema in `tools/list` response
+  - LLMs can now see parameter names, types, descriptions, and valid enum values
+  - Uses `[McpParam]` attribute for field documentation
+  
+- **Screenshot Tools** (Phase 2A)
+  - `unity_take_screenshot` - Capture Game View or Scene View as base64 PNG
+
+- **Search Tools** (Phase 2B)
+  - `unity_search_project` - Search by name, content (grep), or asset references
+
+- **Play Mode Controls** (Phase 3A)
+  - `unity_enter_play_mode` - Enter play mode
+  - `unity_exit_play_mode` - Exit play mode
+  - `unity_pause_play_mode` - Pause/unpause with toggle support
+
+- **Input Simulation** (Phase 3B)
+  - `unity_simulate_key` - Simulate keyboard input
+  - `unity_simulate_mouse` - Simulate mouse clicks
+  - `unity_click_ui_element` - Click UI Buttons/Toggles by name
+
+### Changed
+- All tool definitions now include complete input schemas
+- Added `[McpParam]` attribute for parameter documentation
+
+---
+
 ## [2.0.0] - 2024-12-11
 
 ### Added

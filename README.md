@@ -3,7 +3,7 @@
 [![Unity 2021.3+](https://img.shields.io/badge/Unity-2021.3%2B-blue.svg)](https://unity.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
-[![Version](https://img.shields.io/badge/Version-2.0.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.1.0-orange.svg)](CHANGELOG.md)
 
 A **Model Context Protocol (MCP)** server for Unity that enables AI agents to **query and control** the Unity Editor.
 
@@ -19,11 +19,16 @@ MCP is an open standard by Anthropic that allows AI systems to access external t
 - 🎬 **Scene Management** - Open, save, create, and manage scenes
 - 🏷️ **Prefab Tools** - Instantiate, create, and inspect prefabs
 - 📦 **Asset Browser** - List and search project assets
-- � **Resource Access** - Read scripts, prefabs, and ScriptableObjects
-- �📋 **Console Access** - Read and clear Unity console logs
+- 📁 **Resource Access** - Read scripts, prefabs, and ScriptableObjects
+- 📋 **Console Access** - Read and clear Unity console logs
 - ⚙️ **Editor Control** - Execute menu items, select objects
-- � **Compilation Status** - Monitor build errors and warnings
-- �🔒 **Secure** - Localhost only, no external access
+- 🔧 **Compilation Status** - Monitor build errors and warnings
+- 📷 **Screenshots** - Capture Game View or Scene View (v2.1)
+- 🔍 **Project Search** - Search by name, content, or references (v2.1)
+- ▶️ **Play Mode Control** - Enter/exit/pause play mode (v2.1)
+- 🎮 **Input Simulation** - Keyboard, mouse, and UI interactions (v2.1)
+- 📋 **Schema Support** - Full JSON Schema for all tool parameters (v2.1)
+- 🔒 **Secure** - Localhost only, no external access
 
 ## Installation
 
@@ -43,7 +48,7 @@ MCP is an open standard by Anthropic that allows AI systems to access external t
 3. Click **"Copy Config to Clipboard"**
 4. Paste into your MCP client's configuration file
 
-## Available Tools (27 Total)
+## Available Tools (35 Total)
 
 ### GameObject Tools
 | Tool | Description |
@@ -98,6 +103,22 @@ MCP is an open standard by Anthropic that allows AI systems to access external t
 | `unity_get_compilation_status` | Get compile errors/warnings |
 | `unity_recompile_scripts` | Force recompilation |
 | `unity_get_assemblies` | List project assemblies |
+
+### Screenshot & Search Tools (v2.1)
+| Tool | Description |
+|------|-------------|
+| `unity_take_screenshot` | Capture Game View or Scene View as base64 PNG |
+| `unity_search_project` | Search by name, content, or asset references |
+
+### Play Mode & Input Tools (v2.1)
+| Tool | Description |
+|------|-------------|
+| `unity_enter_play_mode` | Enter play mode |
+| `unity_exit_play_mode` | Exit play mode |
+| `unity_pause_play_mode` | Pause/unpause play mode |
+| `unity_simulate_key` | Simulate keyboard input |
+| `unity_simulate_mouse` | Simulate mouse clicks |
+| `unity_click_ui_element` | Click UI buttons/toggles by name |
 
 ## MCP Resources
 

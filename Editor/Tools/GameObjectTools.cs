@@ -11,7 +11,7 @@ namespace Community.Unity.MCP
     [McpToolProvider]
     public class GameObjectTools
     {
-        [McpTool("unity_create_gameobject", "Create a new GameObject in the scene")]
+        [McpTool("unity_create_gameobject", "Create a new GameObject in the scene", typeof(CreateGameObjectArgs))]
         public static object CreateGameObject(string argsJson)
         {
             var args = JsonUtility.FromJson<CreateGameObjectArgs>(argsJson);
@@ -84,7 +84,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_delete_gameobject", "Delete a GameObject from the scene")]
+        [McpTool("unity_delete_gameobject", "Delete a GameObject from the scene", typeof(DeleteGameObjectArgs))]
         public static object DeleteGameObject(string argsJson)
         {
             var args = JsonUtility.FromJson<DeleteGameObjectArgs>(argsJson);
@@ -114,7 +114,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_set_transform", "Set the transform (position, rotation, scale) of a GameObject")]
+        [McpTool("unity_set_transform", "Set the transform (position, rotation, scale) of a GameObject", typeof(SetTransformArgs))]
         public static object SetTransform(string argsJson)
         {
             var args = JsonUtility.FromJson<SetTransformArgs>(argsJson);
@@ -170,7 +170,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_add_component", "Add a component to a GameObject")]
+        [McpTool("unity_add_component", "Add a component to a GameObject", typeof(AddComponentArgs))]
         public static object AddComponent(string argsJson)
         {
             var args = JsonUtility.FromJson<AddComponentArgs>(argsJson);
@@ -216,7 +216,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_remove_component", "Remove a component from a GameObject")]
+        [McpTool("unity_remove_component", "Remove a component from a GameObject", typeof(RemoveComponentArgs))]
         public static object RemoveComponent(string argsJson)
         {
             var args = JsonUtility.FromJson<RemoveComponentArgs>(argsJson);
@@ -264,7 +264,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_set_component_property", "Set a property value on a component")]
+        [McpTool("unity_set_component_property", "Set a property value on a component", typeof(SetPropertyArgs))]
         public static object SetComponentProperty(string argsJson)
         {
             var args = JsonUtility.FromJson<SetPropertyArgs>(argsJson);
@@ -440,12 +440,12 @@ namespace Community.Unity.MCP
         [Serializable]
         public class CreateGameObjectArgs
         {
-            public string name;
-            public string parentPath;
-            public string primitiveType; // Cube, Sphere, Capsule, Cylinder, Plane, Quad
-            public Vec3 position;
-            public Vec3 rotation;
-            public Vec3 scale;
+            [McpParam("Name of the GameObject")] public string name;
+            [McpParam("Path to parent GameObject")] public string parentPath;
+            [McpParam("Primitive type", EnumValues = new[] { "Cube", "Sphere", "Capsule", "Cylinder", "Plane", "Quad" })] public string primitiveType;
+            [McpParam("World position {x, y, z}")] public Vec3 position;
+            [McpParam("Rotation in euler angles {x, y, z}")] public Vec3 rotation;
+            [McpParam("Local scale {x, y, z}")] public Vec3 scale;
         }
 
         [Serializable]
@@ -460,7 +460,7 @@ namespace Community.Unity.MCP
         [Serializable]
         public class DeleteGameObjectArgs
         {
-            public string path;
+            [McpParam("Path to the GameObject to delete", Required = true)] public string path;
         }
 
         [Serializable]
@@ -474,11 +474,11 @@ namespace Community.Unity.MCP
         [Serializable]
         public class SetTransformArgs
         {
-            public string path;
-            public Vec3 position;
-            public Vec3 rotation;
-            public Vec3 scale;
-            public bool useLocalSpace;
+            [McpParam("Path to the GameObject", Required = true)] public string path;
+            [McpParam("New position {x, y, z}")] public Vec3 position;
+            [McpParam("New rotation in euler angles {x, y, z}")] public Vec3 rotation;
+            [McpParam("New local scale {x, y, z}")] public Vec3 scale;
+            [McpParam("Use local space instead of world space")] public bool useLocalSpace;
         }
 
         [Serializable]
@@ -495,8 +495,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class AddComponentArgs
         {
-            public string path;
-            public string componentType;
+            [McpParam("Path to the GameObject", Required = true)] public string path;
+            [McpParam("Component type name (e.g., 'Rigidbody', 'BoxCollider')", Required = true)] public string componentType;
         }
 
         [Serializable]
@@ -511,8 +511,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class RemoveComponentArgs
         {
-            public string path;
-            public string componentType;
+            [McpParam("Path to the GameObject", Required = true)] public string path;
+            [McpParam("Component type name to remove", Required = true)] public string componentType;
         }
 
         [Serializable]
@@ -526,10 +526,10 @@ namespace Community.Unity.MCP
         [Serializable]
         public class SetPropertyArgs
         {
-            public string path;
-            public string componentType;
-            public string propertyName;
-            public string value;
+            [McpParam("Path to the GameObject", Required = true)] public string path;
+            [McpParam("Component type name", Required = true)] public string componentType;
+            [McpParam("Property name to set", Required = true)] public string propertyName;
+            [McpParam("Value to set (as string, will be parsed)")] public string value;
         }
 
         [Serializable]

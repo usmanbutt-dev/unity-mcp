@@ -12,7 +12,7 @@ namespace Community.Unity.MCP
     [McpToolProvider]
     public class AssetTools
     {
-        [McpTool("unity_get_assets", "List assets in a folder")]
+        [McpTool("unity_get_assets", "List assets in a folder", typeof(GetAssetsArgs))]
         public static object GetAssets(string argsJson)
         {
             var args = JsonUtility.FromJson<GetAssetsArgs>(argsJson);
@@ -96,8 +96,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class GetAssetsArgs
         {
-            public string folderPath;
-            public string filter;
+            [McpParam("Folder path (defaults to 'Assets')")] public string folderPath;
+            [McpParam("Filter string (e.g., 't:Prefab', 't:Script', 'MyAsset')")] public string filter;
         }
 
         [Serializable]

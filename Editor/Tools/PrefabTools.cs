@@ -11,7 +11,7 @@ namespace Community.Unity.MCP
     [McpToolProvider]
     public class PrefabTools
     {
-        [McpTool("unity_instantiate_prefab", "Instantiate a prefab in the scene")]
+        [McpTool("unity_instantiate_prefab", "Instantiate a prefab in the scene", typeof(InstantiatePrefabArgs))]
         public static object InstantiatePrefab(string argsJson)
         {
             var args = JsonUtility.FromJson<InstantiatePrefabArgs>(argsJson);
@@ -78,7 +78,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_get_prefab_info", "Get detailed information about a prefab")]
+        [McpTool("unity_get_prefab_info", "Get detailed information about a prefab", typeof(GetPrefabInfoArgs))]
         public static object GetPrefabInfo(string argsJson)
         {
             var args = JsonUtility.FromJson<GetPrefabInfoArgs>(argsJson);
@@ -101,7 +101,7 @@ namespace Community.Unity.MCP
             return info;
         }
 
-        [McpTool("unity_create_prefab", "Create a prefab from a GameObject in the scene")]
+        [McpTool("unity_create_prefab", "Create a prefab from a GameObject in the scene", typeof(CreatePrefabArgs))]
         public static object CreatePrefab(string argsJson)
         {
             var args = JsonUtility.FromJson<CreatePrefabArgs>(argsJson);
@@ -156,7 +156,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_unpack_prefab", "Unpack a prefab instance in the scene")]
+        [McpTool("unity_unpack_prefab", "Unpack a prefab instance in the scene", typeof(UnpackPrefabArgs))]
         public static object UnpackPrefab(string argsJson)
         {
             var args = JsonUtility.FromJson<UnpackPrefabArgs>(argsJson);
@@ -264,12 +264,12 @@ namespace Community.Unity.MCP
         [Serializable]
         public class InstantiatePrefabArgs
         {
-            public string prefabPath;
-            public string name;
-            public string parentPath;
-            public Vec3 position;
-            public Vec3 rotation;
-            public Vec3 scale;
+            [McpParam("Path to the prefab asset", Required = true)] public string prefabPath;
+            [McpParam("Instance name override")] public string name;
+            [McpParam("Path to parent GameObject")] public string parentPath;
+            [McpParam("World position {x, y, z}")] public Vec3 position;
+            [McpParam("Rotation in euler angles {x, y, z}")] public Vec3 rotation;
+            [McpParam("Local scale {x, y, z}")] public Vec3 scale;
         }
 
         [Serializable]
@@ -285,7 +285,7 @@ namespace Community.Unity.MCP
         [Serializable]
         public class GetPrefabInfoArgs
         {
-            public string prefabPath;
+            [McpParam("Path to the prefab asset", Required = true)] public string prefabPath;
         }
 
         [Serializable]
@@ -315,8 +315,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class CreatePrefabArgs
         {
-            public string gameObjectPath;
-            public string savePath;
+            [McpParam("Path to the GameObject in scene", Required = true)] public string gameObjectPath;
+            [McpParam("Path to save the prefab (e.g., Assets/Prefabs/MyPrefab.prefab)", Required = true)] public string savePath;
         }
 
         [Serializable]
@@ -330,8 +330,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class UnpackPrefabArgs
         {
-            public string path;
-            public bool completely;
+            [McpParam("Path to the prefab instance in scene", Required = true)] public string path;
+            [McpParam("If true, unpacks completely; otherwise unpacks outermost root")] public bool completely;
         }
 
         [Serializable]

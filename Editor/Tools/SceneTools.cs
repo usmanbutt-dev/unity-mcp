@@ -58,7 +58,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_open_scene", "Open a scene in the editor")]
+        [McpTool("unity_open_scene", "Open a scene in the editor", typeof(OpenSceneArgs))]
         public static object OpenScene(string argsJson)
         {
             var args = JsonUtility.FromJson<OpenSceneArgs>(argsJson);
@@ -97,7 +97,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_save_scene", "Save the current scene")]
+        [McpTool("unity_save_scene", "Save the current scene", typeof(SaveSceneArgs))]
         public static object SaveScene(string argsJson)
         {
             var args = JsonUtility.FromJson<SaveSceneArgs>(argsJson);
@@ -140,7 +140,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_new_scene", "Create a new empty scene")]
+        [McpTool("unity_new_scene", "Create a new empty scene", typeof(NewSceneArgs))]
         public static object NewScene(string argsJson)
         {
             var args = JsonUtility.FromJson<NewSceneArgs>(argsJson);
@@ -176,7 +176,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_close_scene", "Close a scene (when multiple scenes are loaded)")]
+        [McpTool("unity_close_scene", "Close a scene (when multiple scenes are loaded)", typeof(CloseSceneArgs))]
         public static object CloseScene(string argsJson)
         {
             var args = JsonUtility.FromJson<CloseSceneArgs>(argsJson);
@@ -208,7 +208,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_set_active_scene", "Set the active scene (when multiple scenes are loaded)")]
+        [McpTool("unity_set_active_scene", "Set the active scene (when multiple scenes are loaded)", typeof(SetActiveSceneArgs))]
         public static object SetActiveScene(string argsJson)
         {
             var args = JsonUtility.FromJson<SetActiveSceneArgs>(argsJson);
@@ -274,8 +274,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class OpenSceneArgs
         {
-            public string scenePath;
-            public bool additive;
+            [McpParam("Path to the scene asset", Required = true)] public string scenePath;
+            [McpParam("If true, opens scene additively")] public bool additive;
         }
 
         [Serializable]
@@ -291,8 +291,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class SaveSceneArgs
         {
-            public string scenePath;
-            public string saveAsPath;
+            [McpParam("Path to scene to save (optional, uses active scene if not provided)")] public string scenePath;
+            [McpParam("Path to save as (optional, saves to current path if not provided)")] public string saveAsPath;
         }
 
         [Serializable]
@@ -306,9 +306,9 @@ namespace Community.Unity.MCP
         [Serializable]
         public class NewSceneArgs
         {
-            public string savePath;
-            public bool addDefaultGameObjects;
-            public bool additive;
+            [McpParam("Path to immediately save the new scene")] public string savePath;
+            [McpParam("If true, adds Camera and Light")] public bool addDefaultGameObjects;
+            [McpParam("If true, adds scene without closing current scenes")] public bool additive;
         }
 
         [Serializable]
@@ -323,8 +323,8 @@ namespace Community.Unity.MCP
         [Serializable]
         public class CloseSceneArgs
         {
-            public string scenePath;
-            public bool removeScene;
+            [McpParam("Path to the scene to close", Required = true)] public string scenePath;
+            [McpParam("If true, removes scene from hierarchy completely")] public bool removeScene;
         }
 
         [Serializable]
@@ -338,7 +338,7 @@ namespace Community.Unity.MCP
         [Serializable]
         public class SetActiveSceneArgs
         {
-            public string scenePath;
+            [McpParam("Path to the scene to set as active", Required = true)] public string scenePath;
         }
 
         [Serializable]

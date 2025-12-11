@@ -34,7 +34,7 @@ namespace Community.Unity.MCP
             };
         }
 
-        [McpTool("unity_get_gameobject", "Get details of a specific GameObject by path")]
+        [McpTool("unity_get_gameobject", "Get details of a specific GameObject by path", typeof(GetGameObjectArgs))]
         public static object GetGameObject(string argsJson)
         {
             var args = JsonUtility.FromJson<GetGameObjectArgs>(argsJson);
@@ -53,7 +53,7 @@ namespace Community.Unity.MCP
             return BuildDetailedGameObjectInfo(go);
         }
 
-        [McpTool("unity_get_components", "Get all components on a GameObject")]
+        [McpTool("unity_get_components", "Get all components on a GameObject", typeof(GetGameObjectArgs))]
         public static object GetComponents(string argsJson)
         {
             var args = JsonUtility.FromJson<GetGameObjectArgs>(argsJson);
@@ -160,7 +160,7 @@ namespace Community.Unity.MCP
         [Serializable]
         public class GetGameObjectArgs
         {
-            public string path;
+            [McpParam("Path to the GameObject", Required = true)] public string path;
         }
 
         [Serializable]
