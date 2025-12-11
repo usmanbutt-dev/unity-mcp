@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2024-12-12
+
+### Added
+- **Animation Tools**
+  - `unity_set_animator_parameter` - Set bool/float/int/trigger parameters
+  - `unity_get_animator_info` - Get animator state, parameters, layers
+  - `unity_play_animation` - Play animation state by name
+
+- **Material & Shader Tools**
+  - `unity_get_material_info` - Get material properties and shader
+  - `unity_set_material_property` - Set color/float/int/vector properties
+  - `unity_set_material` - Assign material to renderer
+
+- **Physics Tools**
+  - `unity_raycast` - Cast ray and get hit info
+  - `unity_overlap_sphere` - Find colliders in radius
+  - `unity_add_force` - Apply force to Rigidbody (play mode)
+
+- **Asset Creation Tools**
+  - `unity_create_folder` - Create project folders
+  - `unity_create_material` - Create material assets
+  - `unity_create_script` - Create C# scripts with templates
+  - `unity_move_asset` - Move/rename assets
+  - `unity_duplicate_asset` - Duplicate assets
+
+- **AI Context Tools**
+  - `unity_get_scene_summary` - Compact scene overview
+  - `unity_get_component_schema` - Get component properties schema
+  - `unity_get_type_info` - Discover Unity component types
+
+---
+
 ## [2.1.0] - 2024-12-12
 
 ### Added

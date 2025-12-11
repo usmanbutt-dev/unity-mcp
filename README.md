@@ -3,7 +3,7 @@
 [![Unity 2021.3+](https://img.shields.io/badge/Unity-2021.3%2B-blue.svg)](https://unity.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
-[![Version](https://img.shields.io/badge/Version-2.1.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.2.0-orange.svg)](CHANGELOG.md)
 
 A **Model Context Protocol (MCP)** server for Unity that enables AI agents to **query and control** the Unity Editor.
 
@@ -48,7 +48,7 @@ MCP is an open standard by Anthropic that allows AI systems to access external t
 3. Click **"Copy Config to Clipboard"**
 4. Paste into your MCP client's configuration file
 
-## Available Tools (35 Total)
+## Available Tools (52 Total)
 
 ### GameObject Tools
 | Tool | Description |
@@ -119,6 +119,43 @@ MCP is an open standard by Anthropic that allows AI systems to access external t
 | `unity_simulate_key` | Simulate keyboard input |
 | `unity_simulate_mouse` | Simulate mouse clicks |
 | `unity_click_ui_element` | Click UI buttons/toggles by name |
+
+### Animation Tools (v2.2)
+| Tool | Description |
+|------|-------------|
+| `unity_set_animator_parameter` | Set bool/float/int/trigger parameters |
+| `unity_get_animator_info` | Get animator state, parameters, layers |
+| `unity_play_animation` | Play animation state by name |
+
+### Material & Shader Tools (v2.2)
+| Tool | Description |
+|------|-------------|
+| `unity_get_material_info` | Get material properties and shader |
+| `unity_set_material_property` | Set color/float/int/vector properties |
+| `unity_set_material` | Assign material to renderer |
+
+### Physics Tools (v2.2)
+| Tool | Description |
+|------|-------------|
+| `unity_raycast` | Cast ray and get hit info |
+| `unity_overlap_sphere` | Find colliders in radius |
+| `unity_add_force` | Apply force to Rigidbody |
+
+### Asset Creation Tools (v2.2)
+| Tool | Description |
+|------|-------------|
+| `unity_create_folder` | Create project folders |
+| `unity_create_material` | Create material assets |
+| `unity_create_script` | Create C# scripts with templates |
+| `unity_move_asset` | Move/rename assets |
+| `unity_duplicate_asset` | Duplicate assets |
+
+### AI Context Tools (v2.2)
+| Tool | Description |
+|------|-------------|
+| `unity_get_scene_summary` | Compact scene overview for AI |
+| `unity_get_component_schema` | Get component properties schema |
+| `unity_get_type_info` | Discover Unity component types |
 
 ## MCP Resources
 
