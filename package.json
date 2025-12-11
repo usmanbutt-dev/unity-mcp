@@ -1,0 +1,30 @@
+{
+    "name": "com.community.unity-mcp",
+    "version": "1.0.0",
+    "displayName": "Unity MCP Server",
+    "description": "Model Context Protocol (MCP) server for Unity. Enables AI agents to query scenes, assets, and execute actions in the Unity Editor.",
+    "unity": "2021.3",
+    "unityRelease": "0f1",
+    "documentationUrl": "https://github.com/usmanbutt-dev/unity-mcp#readme",
+    "changelogUrl": "https://github.com/usmanbutt-dev/unity-mcp/blob/main/CHANGELOG.md",
+    "licensesUrl": "https://github.com/usmanbutt-dev/unity-mcp/blob/main/LICENSE",
+    "keywords": [
+        "mcp",
+        "ai",
+        "llm",
+        "agent",
+        "antigravity",
+        "claude",
+        "gemini"
+    ],
+    "author": {
+        "name": "Usman Butt",
+        "url": "https://github.com/usmanbutt-dev"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/usmanbutt-dev/unity-mcp.git"
+    },
+    "type": "tool",
+    "dependencies": {}
+}

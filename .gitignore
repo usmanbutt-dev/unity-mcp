@@ -1,0 +1,13 @@
+# IDE
+.idea/
+.vs/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+[Bb]uild/
+[Ll]ibrary/
