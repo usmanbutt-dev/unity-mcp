@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,18 +11,37 @@ namespace Community.Unity.MCP
     {
         private int _port = 3000;
         private Vector2 _scrollPosition;
+        private string _bridgePath;
+        private bool _showAllTools;
 
         [MenuItem("Window/MCP Server")]
         public static void ShowWindow()
         {
             var window = GetWindow<McpServerWindow>("MCP Server");
-            window.minSize = new Vector2(300, 200);
+            window.minSize = new Vector2(350, 400);
         }
 
         private void OnEnable()
         {
             _port = EditorPrefs.GetInt("MCP_Port", 3000);
             McpServer.OnServerStateChanged += OnServerStateChanged;
+            
+            // Find bridge path
+            var guids = AssetDatabase.FindAssets("mcp-bridge t:TextAsset");
+            if (guids.Length > 0)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+                _bridgePath = Path.GetFullPath(assetPath);
+            }
+            else
+            {
+                // Fallback: look in package folder
+                var packagePath = "Packages/com.community.unity-mcp/Bridge/mcp-bridge.js";
+                if (File.Exists(packagePath))
+                {
+                    _bridgePath = Path.GetFullPath(packagePath);
+                }
+            }
         }
 
         private void OnDisable()
@@ -50,6 +70,33 @@ namespace Community.Unity.MCP
             EditorGUILayout.Space(10);
 
             // Server Status
+            DrawServerStatus();
+
+            EditorGUILayout.Space(10);
+
+            // Port Configuration
+            DrawConfiguration();
+
+            EditorGUILayout.Space(10);
+
+            // Control Buttons
+            DrawControlButtons();
+
+            EditorGUILayout.Space(10);
+
+            // Connection Info
+            DrawConnectionInfo();
+
+            EditorGUILayout.Space(10);
+
+            // Available Tools
+            DrawToolsList();
+
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawServerStatus()
+        {
             EditorGUILayout.LabelField("Status", EditorStyles.boldLabel);
             
             var isRunning = McpServer.Instance.IsRunning;
@@ -68,11 +115,13 @@ namespace Community.Unity.MCP
                     EditorGUILayout.LabelField($"http://localhost:{McpServer.Instance.Port}/");
                 }
             }
+        }
 
-            EditorGUILayout.Space(10);
-
-            // Port Configuration
+        private void DrawConfiguration()
+        {
             EditorGUILayout.LabelField("Configuration", EditorStyles.boldLabel);
+            
+            var isRunning = McpServer.Instance.IsRunning;
             
             using (new EditorGUI.DisabledGroupScope(isRunning))
             {
@@ -83,10 +132,12 @@ namespace Community.Unity.MCP
                     EditorPrefs.SetInt("MCP_Port", _port);
                 }
             }
+        }
 
-            EditorGUILayout.Space(10);
-
-            // Control Buttons
+        private void DrawControlButtons()
+        {
+            var isRunning = McpServer.Instance.IsRunning;
+            
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (!isRunning)
@@ -105,49 +156,76 @@ namespace Community.Unity.MCP
                     }
                 }
             }
+        }
 
-            EditorGUILayout.Space(10);
+        private void DrawConnectionInfo()
+        {
+            EditorGUILayout.LabelField("MCP Client Configuration", EditorStyles.boldLabel);
+            
+            // Generate proper config with bridge
+            string bridgePathEscaped = _bridgePath?.Replace("\\", "\\\\") ?? "[BRIDGE_PATH]";
+            
+            string config = "{\n" +
+                "  \"mcpServers\": {\n" +
+                "    \"unity\": {\n" +
+                "      \"command\": \"node\",\n" +
+                $"      \"args\": [\"{bridgePathEscaped}\"]\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+            
+            EditorGUILayout.HelpBox(
+                "Add this to your MCP client configuration (e.g., mcp_config.json):\n\n" + config,
+                MessageType.None);
 
-            // Connection Info
-            if (isRunning)
+            using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("Connection Info", EditorStyles.boldLabel);
-                
-                EditorGUILayout.HelpBox(
-                    "Add this to your MCP client configuration:\n\n" +
-                    "{\n" +
-                    "  \"mcpServers\": {\n" +
-                    "    \"unity\": {\n" +
-                    $"      \"url\": \"http://localhost:{_port}/\"\n" +
-                    "    }\n" +
-                    "  }\n" +
-                    "}",
-                    MessageType.None);
-
-                if (GUILayout.Button("Copy URL to Clipboard"))
+                if (GUILayout.Button("Copy Config to Clipboard"))
                 {
-                    EditorGUIUtility.systemCopyBuffer = $"http://localhost:{_port}/";
-                    Debug.Log("[MCP] URL copied to clipboard.");
+                    EditorGUIUtility.systemCopyBuffer = config;
+                    Debug.Log("[MCP] Configuration copied to clipboard.");
+                }
+                
+                if (GUILayout.Button("Open Bridge Folder"))
+                {
+                    if (!string.IsNullOrEmpty(_bridgePath))
+                    {
+                        EditorUtility.RevealInFinder(_bridgePath);
+                    }
                 }
             }
+            
+            // Bridge path info
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("Bridge Path:", EditorStyles.miniLabel);
+            EditorGUILayout.SelectableLabel(_bridgePath ?? "(not found)", EditorStyles.miniTextField, GUILayout.Height(18));
+        }
 
-            EditorGUILayout.Space(10);
-
-            // Available Tools
+        private void DrawToolsList()
+        {
             EditorGUILayout.LabelField("Available Tools", EditorStyles.boldLabel);
             
             var tools = ToolRegistry.GetToolDefinitions();
-            foreach (var tool in tools)
-            {
-                EditorGUILayout.LabelField($"• {tool.name}", EditorStyles.miniLabel);
-            }
-
+            
             if (tools.Length == 0)
             {
                 EditorGUILayout.LabelField("(Start server to load tools)", EditorStyles.miniLabel);
+                return;
             }
 
-            EditorGUILayout.EndScrollView();
+            EditorGUILayout.LabelField($"{tools.Length} tools registered", EditorStyles.miniLabel);
+            
+            _showAllTools = EditorGUILayout.Foldout(_showAllTools, "Show All Tools");
+            
+            if (_showAllTools)
+            {
+                EditorGUI.indentLevel++;
+                foreach (var tool in tools)
+                {
+                    EditorGUILayout.LabelField($"• {tool.name}", EditorStyles.miniLabel);
+                }
+                EditorGUI.indentLevel--;
+            }
         }
     }
 }

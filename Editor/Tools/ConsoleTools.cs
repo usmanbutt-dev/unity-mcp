@@ -48,7 +48,8 @@ namespace Community.Unity.MCP
         public static object GetConsoleLogs(string argsJson)
         {
             var args = JsonUtility.FromJson<GetLogsArgs>(argsJson);
-            var count = args?.count ?? 50;
+            // count defaults to 0 in JsonUtility, so we need to check for <= 0
+            var count = (args?.count ?? 0) <= 0 ? 50 : args.count;
             var typeFilter = args?.type;
 
             List<LogEntry> results;

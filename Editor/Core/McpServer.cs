@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -10,7 +11,7 @@ using UnityEngine;
 namespace Community.Unity.MCP
 {
     /// <summary>
-    /// HTTP server that handles MCP JSON-RPC requests.
+    /// HTTP server that handles MCP JSON-RPC requests via HTTP POST and pushes events via SSE.
     /// Runs on a background thread and dispatches to the main thread for Unity API calls.
     /// </summary>
     [InitializeOnLoad]
@@ -21,6 +22,7 @@ namespace Community.Unity.MCP
         private Thread _listenerThread;
         private bool _isRunning;
         private readonly Queue<Action> _mainThreadQueue = new Queue<Action>();
+        private readonly ConcurrentDictionary<Guid, HttpListenerResponse> _sseClients = new ConcurrentDictionary<Guid, HttpListenerResponse>();
 
         public static McpServer Instance => _instance ??= new McpServer();
 
@@ -32,6 +34,19 @@ namespace Community.Unity.MCP
         static McpServer()
         {
             EditorApplication.update += ProcessMainThreadQueue;
+        }
+
+        [InitializeOnLoadMethod]
+        private static void AutoStart()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                if (!Instance.IsRunning)
+                {
+                    int port = EditorPrefs.GetInt("MCP_Port", 3000);
+                    Instance.Start(port);
+                }
+            };
         }
 
         /// <summary>
@@ -68,13 +83,20 @@ namespace Community.Unity.MCP
         }
 
         /// <summary>
-        /// Stops the MCP server.
+        /// Stops the MCP server and closes all connections.
         /// </summary>
         public void Stop()
         {
             if (!_isRunning) return;
 
             _isRunning = false;
+
+            // Close all SSE connections
+            foreach (var client in _sseClients)
+            {
+                try { client.Value.Close(); } catch { }
+            }
+            _sseClients.Clear();
 
             try
             {
@@ -89,6 +111,32 @@ namespace Community.Unity.MCP
 
             Debug.Log("[MCP] Server stopped.");
             OnServerStateChanged?.Invoke(false);
+        }
+
+        /// <summary>
+        /// Sends a JSON-RPC notification/response to all connected SSE clients.
+        /// </summary>
+        public void SendNotification(string jsonMessage)
+        {
+            if (!_isRunning || _sseClients.IsEmpty) return;
+
+            // Format as SSE data
+            string sseData = $"data: {jsonMessage}\n\n";
+            byte[] bytes = Encoding.UTF8.GetBytes(sseData);
+
+            foreach (var kvp in _sseClients)
+            {
+                try
+                {
+                    kvp.Value.OutputStream.Write(bytes, 0, bytes.Length);
+                    kvp.Value.OutputStream.Flush();
+                }
+                catch
+                {
+                    // If write fails, client usually disconnected
+                    _sseClients.TryRemove(kvp.Key, out _);
+                }
+            }
         }
 
         private void ListenLoop()
@@ -120,14 +168,13 @@ namespace Community.Unity.MCP
             var request = context.Request;
             var response = context.Response;
 
-            // Add CORS headers
+            // CORS headers
             response.Headers.Add("Access-Control-Allow-Origin", "*");
-            response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
+            response.Headers.Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
             response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
 
             try
             {
-                // Handle preflight
                 if (request.HttpMethod == "OPTIONS")
                 {
                     response.StatusCode = 200;
@@ -135,62 +182,110 @@ namespace Community.Unity.MCP
                     return;
                 }
 
-                // Only accept POST for JSON-RPC
-                if (request.HttpMethod != "POST")
+                // Route based on path
+                if (request.Url.AbsolutePath == "/sse" && request.HttpMethod == "GET")
                 {
-                    SendError(response, 405, "Method Not Allowed");
-                    return;
+                    HandleSseConnection(context);
                 }
-
-                // Read request body
-                string requestBody;
-                using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+                else if ((request.Url.AbsolutePath == "/message" || request.Url.AbsolutePath == "/") && request.HttpMethod == "POST")
                 {
-                    requestBody = reader.ReadToEnd();
+                    HandleMessage(context);
                 }
-
-                // Process JSON-RPC on main thread and wait for result
-                string responseBody = null;
-                var waitHandle = new ManualResetEvent(false);
-
-                EnqueueMainThread(() =>
+                else
                 {
-                    try
-                    {
-                        responseBody = JsonRpcHandler.ProcessRequest(requestBody);
-                    }
-                    catch (Exception ex)
-                    {
-                        responseBody = JsonRpcHandler.CreateErrorResponse(null, -32603, ex.Message);
-                    }
-                    finally
-                    {
-                        waitHandle.Set();
-                    }
-                });
-
-                // Wait for main thread processing (timeout after 30 seconds)
-                if (!waitHandle.WaitOne(30000))
-                {
-                    responseBody = JsonRpcHandler.CreateErrorResponse(null, -32603, "Request timeout");
+                    SendError(response, 404, "Not Found");
+                    response.Close();
                 }
-
-                // Send response
-                response.ContentType = "application/json";
-                response.StatusCode = 200;
-                var buffer = Encoding.UTF8.GetBytes(responseBody);
-                response.ContentLength64 = buffer.Length;
-                response.OutputStream.Write(buffer, 0, buffer.Length);
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[MCP] Request handling error: {ex.Message}");
-                SendError(response, 500, "Internal Server Error");
+                try { SendError(response, 500, "Internal Server Error"); response.Close(); } catch { }
             }
-            finally
+        }
+
+        private void HandleSseConnection(HttpListenerContext context)
+        {
+            var response = context.Response;
+            response.ContentType = "text/event-stream";
+            response.Headers.Add("Cache-Control", "no-cache");
+            response.Headers.Add("Connection", "keep-alive");
+            response.StatusCode = 200;
+
+            var result = Guid.NewGuid();
+            _sseClients.TryAdd(result, response);
+
+            Debug.Log($"[MCP] Client connected via SSE: {result}");
+
+            // Send initial connection message to keep it alive or handshake?
+            // Optional, but good practice to flush headers
+            try
             {
-                response.Close();
+                string init = ": connected\n\n";
+                byte[] bytes = Encoding.UTF8.GetBytes(init);
+                response.OutputStream.Write(bytes, 0, bytes.Length);
+                response.OutputStream.Flush();
             }
+            catch
+            {
+                _sseClients.TryRemove(result, out _);
+                response.Close();
+                return;
+            }
+            
+            // Keep the connection open indefinitely until client disconnects or server stops
+            // The ListenLoop thread actually handed this off to ThreadPool, so blocking here blocks one pool thread.
+            // For a simple server this is okay. Ideally we'd use async IO but HttpListener synchronous API is simpler.
+            while (_isRunning && _sseClients.ContainsKey(result))
+            {
+                Thread.Sleep(1000); // Check every second
+            }
+
+            try { response.Close(); } catch { }
+        }
+
+        private void HandleMessage(HttpListenerContext context)
+        {
+            var request = context.Request;
+            var response = context.Response;
+
+            string requestBody;
+            using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+            {
+                requestBody = reader.ReadToEnd();
+            }
+
+            string responseBody = null;
+            var waitHandle = new ManualResetEvent(false);
+
+            EnqueueMainThread(() =>
+            {
+                try
+                {
+                    responseBody = JsonRpcHandler.ProcessRequest(requestBody);
+                }
+                catch (Exception ex)
+                {
+                    responseBody = JsonRpcHandler.CreateErrorResponse(null, -32603, ex.Message);
+                }
+                finally
+                {
+                    waitHandle.Set();
+                }
+            });
+
+            if (!waitHandle.WaitOne(30000))
+            {
+                responseBody = JsonRpcHandler.CreateErrorResponse(null, -32603, "Request timeout");
+            }
+
+            // Send response direct in POST reply
+            response.ContentType = "application/json";
+            response.StatusCode = 200;
+            var buffer = Encoding.UTF8.GetBytes(responseBody ?? "{}");
+            response.ContentLength64 = buffer.Length;
+            response.OutputStream.Write(buffer, 0, buffer.Length);
+            response.Close();
         }
 
         private void SendError(HttpListenerResponse response, int statusCode, string message)
