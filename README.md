@@ -7,6 +7,12 @@
 
 A **Model Context Protocol (MCP)** server for Unity that enables AI agents to **query and control** the Unity Editor.
 
+> **Project status:** This was a personal exploration of agent-controlled Unity workflows. Development is paused after Unity introduced its own MCP support; this repository is kept as a reference implementation.
+
+![Architecture diagram: MCP client communicates through a Node bridge with the Unity Editor](docs/architecture.svg)
+
+*Architecture diagram based on this repository; not a screenshot.*
+
 ## What is MCP?
 
 MCP is an open standard by Anthropic that allows AI systems to access external tools and data. This package turns Unity into an MCP server, letting AI assistants like **Antigravity**, **Claude**, and **Cursor** query your scenes, assets, and execute editor commands.
