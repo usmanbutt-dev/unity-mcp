@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="270" viewBox="0 0 1000 270" role="img" aria-labelledby="title desc">
+  <title id="title">Unity MCP architecture</title>
+  <desc id="desc">An MCP client sends standard input and output messages through a Node.js bridge, which communicates with a Unity Editor HTTP and SSE server. The Unity server dispatches requests to editor tools.</desc>
+  <rect width="1000" height="270" rx="24" fill="#f6f8fa"/>
+  <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+    <rect x="35" y="55" width="220" height="150" rx="14" fill="#ffffff" stroke="#8c959f" stroke-width="2"/>
+    <text x="145" y="115" font-size="24" font-weight="700" fill="#24292f">MCP client</text>
+    <text x="145" y="148" font-size="16" fill="#57606a">AI assistant</text>
+    <rect x="390" y="55" width="220" height="150" rx="14" fill="#ffffff" stroke="#8c959f" stroke-width="2"/>
+    <text x="500" y="112" font-size="24" font-weight="700" fill="#24292f">Node bridge</text>
+    <text x="500" y="145" font-size="16" fill="#57606a">mcp-bridge.js</text>
+    <rect x="745" y="55" width="220" height="150" rx="14" fill="#ffffff" stroke="#8c959f" stroke-width="2"/>
+    <text x="855" y="105" font-size="24" font-weight="700" fill="#24292f">Unity Editor</text>
+    <text x="855" y="138" font-size="16" fill="#57606a">HTTP + SSE server</text>
+    <text x="855" y="165" font-size="16" fill="#57606a">Tool registry</text>
+    <path d="M270 130h100m-11-10 11 10-11 10M281 120l-11 10 11 10M625 130h100m-11-10 11 10-11 10M636 120l-11 10 11 10" fill="none" stroke="#0969da" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="320" y="103" font-size="15" fill="#0969da">stdio</text>
+    <text x="675" y="103" font-size="15" fill="#0969da">localhost</text>
+    <text x="675" y="177" font-size="14" fill="#57606a">POST /message · GET /sse</text>
+  </g>
+</svg>
